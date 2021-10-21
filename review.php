@@ -167,24 +167,6 @@ if (isset($_POST['submit'])) {
         margin: 20px 0;
     }
 
-    .new-react-version {
-        padding: 20px 20px;
-        border: 1px solid #eee;
-        border-radius: 20px;
-        box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-
-        text-align: center;
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    .new-react-version .react-svg-logo {
-        text-align: center;
-        max-width: 60px;
-        margin: 20px auto;
-        margin-top: 0;
-    }
-
     /* Rating Star Widgets Style */
     .rating-stars ul {
         list-style-type: none;

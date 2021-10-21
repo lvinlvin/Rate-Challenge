@@ -1,32 +1,45 @@
 <?php
+header("Access-Control-Allow-Origin: *");
 $conn = new mysqli("localhost:3306", "root", "root");
 // Check connection
 if ($conn->connect_error) {
    die("Connection failed: " . $conn->connect_error);
 }
 
+// use Workerman\Worker;
+// use PHPSocketIO\SocketIO;
+
+// $io = new SocketIO(2500);
+// // 当有客户端连接时
+// $io->on('connection', function($socket)use($io){
+//   // 定义chat message事件回调函数
+//   $socket->on('chat message', function($msg)use($io){
+//     // 触发所有客户端定义的chat message from server事件
+//     $io->emit('chat message from server', $msg);
+//   });
+// });
+// Worker::runAll();
+
 if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    echo 'We don\'t have mysqli!!!';
 } else {
-   // echo "here";
    $mysqlNew = "SELECT * FROM ratechallenge.item";
-   //AND mra_password='" . $admin_password . "'
    $resultNewLocation = $conn->query($mysqlNew);
    if ($resultNewLocation->num_rows > 0) {
-      //  echo "here";
       $getitem = [];
       while ($row = $resultNewLocation->fetch_assoc()) {
          $itemob = array(
             "id" => $row["id"],
             "name" => $row["name"],
          );
-         // echo $row["name"];
          array_push($getitem, $itemob);
       }
    }
 
    $queryReview = "SELECT * FROM ratechallenge.rate";
    $resultReview = $conn->query($queryReview);
+
+   //Get Review
    if ($resultReview->num_rows > 0) {
       $getReview = [];
       while ($row = $resultReview->fetch_assoc()) {
@@ -35,7 +48,6 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
             "review" => $row["review"],
             "item_id" => $row["item_id"],
          );
-         // echo $row["name"];
          array_push($getReview, $itemob);
       }
    }
@@ -60,7 +72,7 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
    <link href='https://fonts.googleapis.com/css?family=Grand+Hotel' rel='stylesheet' type='text/css'>
    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js" crossorigin="anonymous"></script>
 </head>
 <style>
    body {
@@ -72,15 +84,16 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    }
 
    .title {
-      text-align: center;
-      font-size: 30px;
+      /* text-align: center; */
+      font-size: 38px;
       font-weight: bold;
-      margin: 14px;
+      margin: 20px 0px;
    }
 
-   .row {
-      display: flex;
-      justify-content: space-around;
+   .setRow {
+      /* display: flex;
+      justify-content: space-around; */
+      width: 600px;
    }
 
    .total_rate {
@@ -92,8 +105,26 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100px;
+      width: 150px;
+      height: 38px;
       border-radius: 6px;
+      float: right;
+   }
+
+   .review_row {
+      display: flex;
+      margin: 6px 0px;
+   }
+
+   .review_title {
+      font-size: 24px;
+      margin: 20px 0px;
+   }
+
+   .review_total {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
    }
 
    * {
@@ -170,24 +201,6 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
       margin: 20px 0;
    }
 
-   .new-react-version {
-      padding: 20px 20px;
-      border: 1px solid #eee;
-      border-radius: 20px;
-      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-
-      text-align: center;
-      font-size: 14px;
-      line-height: 1.7;
-   }
-
-   .new-react-version .react-svg-logo {
-      text-align: center;
-      max-width: 60px;
-      margin: 20px auto;
-      margin-top: 0;
-   }
-
    /* Rating Star Widgets Style */
    .rating-stars ul {
       list-style-type: none;
@@ -236,56 +249,42 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
 
    <?php foreach ($getitem as $value) {
    ?>
-      <div class="title"><?php echo $value["name"] . "</br>"; ?></div>
-      <div class="row">
-         <div style="display:flex;">
-            <div class="total_rate">0.0</div>
-            <div style="width:10px;"></div>
-            <div class='rating-stars text-center'>
-               <ul id='stars'>
-                  <li class='star' title='Poor' data-value='1'>
-                     <i class='fa fa-star fa-fw'></i>
-                  </li>
-                  <li class='star' title='Fair' data-value='2'>
-                     <i class='fa fa-star fa-fw'></i>
-                  </li>
-                  <li class='star' title='Good' data-value='3'>
-                     <i class='fa fa-star fa-fw'></i>
-                  </li>
-                  <li class='star' title='Excellent' data-value='4'>
-                     <i class='fa fa-star fa-fw'></i>
-                  </li>
-                  <li class='star' title='WOW!!!' data-value='5'>
-                     <i class='fa fa-star fa-fw'></i>
-                  </li>
-               </ul>
-            </div>
-         </div>
-
-         <div class="setButton" onclick="goAddReview('<?php echo $value['id'] ?>');">Add Review</div>
-      </div>
-      <?php
-      if (count($getReview) > 0) {
-      } ?>
-      <div>
-         <div>Review</div>
-         <?php
-         foreach ($getReview as $val) {
-            if ($val["item_id"] == $value["id"]) {
-               $unStar = 5 - $val["star"];
-               // echo $unStar;
-         ?>
+      <div style="width:600px;">
+         <div class="title"><?php echo $value["name"] . "</br>"; ?></div>
+         <div class="setRow">
+            <div style="display:flex; float:left;">
+               <?php
+               $total_star = 0;
+               $total_r = 0;
+               $showRe = false;
+               $reviewP = 0;
+               if (count($getReview) > 0) {
+                  foreach ($getReview as $v) {
+                     if ($v["item_id"] == $value["id"]) {
+                        $total_r++;
+                        $total_star += $v["star"];
+                        $showRe = true;
+                     }
+                  }
+                  if ($showRe) $reviewP = $total_star / $total_r;
+                  //become number
+                  $showTotalStarReviewSelected = round($reviewP);
+                  $showTotalStarReview = 5 - $showTotalStarReviewSelected;
+               }
+               ?>
+               <div class="total_rate" id="total_rate"><?php echo $reviewP; ?></div>
+               <div style="width:20px;"></div>
                <div class='rating-stars text-center'>
                   <ul id='stars'>
                      <?php
-                     for ($i = 0; $i < $val["star"]; $i++) {
+                     for ($i = 0; $i < $showTotalStarReviewSelected; $i++) {
                      ?>
                         <li class='star selected'>
                            <i class='fa fa-star fa-fw'></i>
                         </li>
                      <?php
                      }
-                     for ($j = 0; $j < $unStar; $j++) {
+                     for ($i = 0; $i < $showTotalStarReview; $i++) {
                      ?>
                         <li class='star'>
                            <i class='fa fa-star fa-fw'></i>
@@ -293,16 +292,61 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
                      <?php
                      }
                      ?>
-                       <!-- <li class='star selected'>
-                           <i class='fa fa-star-half-full fa-fw'></i>
-                        </li> -->
                   </ul>
                </div>
-         <?php
-            }
-         } ?>
-      </div>
+            </div>
 
+            <div class="setButton" onclick="goAddReview('<?php echo $value['id'] ?>');">Add Review</div>
+         </div>
+         <div style="clear: both;"></div>
+         <?php
+         if ($showRe) {
+         ?>
+            <hr>
+            <div>
+               <div class="review_title">Review</div>
+               <?php
+               foreach ($getReview as $val) {
+                  if ($val["item_id"] == $value["id"]) {
+               ?>
+
+                     <?php
+                     $unStar = 5 - $val["star"];
+                     // echo $unStar;
+                     ?>
+                     <div class="review_row">
+                        <div class='rating-stars text-center'>
+                           <ul id='stars'>
+                              <?php
+                              for ($i = 0; $i < $val["star"]; $i++) {
+                              ?>
+                                 <li class='star selected'>
+                                    <i class='fa fa-star fa-fw'></i>
+                                 </li>
+                              <?php
+                              }
+                              for ($j = 0; $j < $unStar; $j++) {
+                              ?>
+                                 <li class='star'>
+                                    <i class='fa fa-star fa-fw'></i>
+                                 </li>
+                              <?php
+                              }
+                              ?>
+                              <!-- <li class='star selected'>
+                           <i class='fa fa-star-half-full fa-fw'></i>
+                        </li> -->
+                           </ul>
+                        </div>
+                        <div style="width:20px;"></div>
+                        <div class="review_total"><?php echo $val["star"] ?>, <?php echo $val['review'] ?> </div>
+                     </div>
+            <?php
+                  }
+               }
+            } ?>
+            </div>
+      </div>
    <?php
    }
    ?>
@@ -311,18 +355,30 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    <div>
    </div>
    <script>
+      //start socket
+   //    var socket = io('http://localhost:2500', {
+   //      secure: true,
+   //      transports: ['websocket', 'polling']
+   //  });
+
+
+
       $(document).ready(function() {
 
 
-
-
       });
-
+      //go to page AddReview
       function goAddReview(title) {
-         document.cookie = escape("id") + "=" +
-            escape(title);
+         //put into cookie
+         document.cookie = escape("id") + "=" + escape(title);
          location.href = "review.php";
       }
+
+      // socket.on("add_review", function(data)
+      // {
+
+      //       $(total_rate).appendChild()
+      // })
    </script>
 
 </body>
