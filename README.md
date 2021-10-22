@@ -1,4 +1,4 @@
-<b>CREATE a Rate Challenge front-end<b>
+<h1>CREATE a Rate Challenge front-end</h1>
 
 First at all, I'm using Window 10 for this project.</br>
 You have to install XAMPP into your Window and start the Apache Server port to continue this project and also install MYSQL to your Window as well.
@@ -22,7 +22,7 @@ In this project the most challenging part is displaying rating real-time, the so
 This is my first time that to deal with this real-time update data. Previously just got knowledge at the one on one chat at college.
 To support half-star selection is also a big challenge to me because need checks the click that we select.
 
-<b>Architectural decisions <b>
+<h3>Architectural decisions </h3></br>
 At first, I plan to use workerman and phpsocket.io plugin as WebSocket that easily I use one PHP to do all conditions but when I try to see the documentation inside the GitHub, it does not have much information that GitHub provides me to use this plugin on Window.
 After that, I decide to use NodeJS as WebSocket and also REST API Request. I try to make multiple products to display and show the Review. In this part, I try lots of conditions to handle this.
 
