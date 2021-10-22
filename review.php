@@ -1,26 +1,23 @@
 <?php
 $conn = new mysqli("localhost:3306", "root", "root");
-// Check connection
+// Check MYSQL connection
 if ($conn->connect_error) {
-   die("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
 }
 
+//Check mysql is work or failed
 if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
-   echo 'We don\'t have mysqli!!!';
+    echo 'We don\'t have mysqli!!!';
 } else {
-
 }
 
+//Handle POST Request
 if (isset($_POST['submit'])) {
     $timezone = new DateTime("now", new DateTimeZone('Asia/Kuala_Lumpur'));
     $now = $timezone->format('Y-m-d H:i:s');
     $reviewText = $_POST["reviewText"];
     $id = $_COOKIE["id"];
     $rate_star = $_COOKIE["rate_star"];
-    // echo $p1 . " " . $getName . " " . $form_data;
-    // $p2 = $_POST["p2"];
-    // $pile = $_POST["pile"];
-    // $form_data = $_COOKIE["rate_star"];
     $sql = "INSERT INTO ratechallenge.rate(star,review,item_id,created_at) VALUE('$rate_star', '$reviewText', '$id','$now')";
 
     if (!$conn->query($sql)) {
@@ -29,7 +26,7 @@ if (isset($_POST['submit'])) {
     } else {
         $check = $conn->insert_id;
         $conn->close();
-          header('Location: index.php');
+        header('Location: index.php');
         exit;
         header("Refresh: 0"); // here 0 is in seconds
     }
@@ -57,23 +54,21 @@ if (isset($_POST['submit'])) {
 <style>
     body {
         font-family: "Open Sans", Helvetica, Arial, sans-serif;
-        color: #555;
-        max-width: 680px;
-        margin: 0 auto;
+        display: flex;
         padding: 0 20px;
+        justify-content: center;
+        align-items: center;
     }
 
     .title {
-        text-align: center;
         font-size: 30px;
         font-weight: bold;
-        margin: 14px;
+        margin: 20px 0px;
     }
 
     .rating {
-        text-align: center;
-        margin: 20px;
-        font-size: 16px;
+        margin: 20px 0px;
+        font-size: 20px;
     }
 
     .setButton {
@@ -91,6 +86,7 @@ if (isset($_POST['submit'])) {
         background-color: white;
         border-radius: 4px;
         height: 40px;
+        border: 1px solid grey;
     }
 
     * {
@@ -111,7 +107,7 @@ if (isset($_POST['submit'])) {
     }
 
     .text-center {
-        text-align: center;
+        text-align: left;
     }
 
     a {
@@ -167,36 +163,77 @@ if (isset($_POST['submit'])) {
         margin: 20px 0;
     }
 
-    /* Rating Star Widgets Style */
-    .rating-stars ul {
-        list-style-type: none;
-        padding: 0;
 
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        margin-bottom: 0px;
+    h1 {
+        font-size: 2em;
+        margin-bottom: 0.5rem;
     }
 
-    .rating-stars ul>li.star {
+    /* Ratings widget */
+    .rate {
         display: inline-block;
+        border: 0;
     }
 
-    /* Idle State of the stars */
-    .rating-stars ul>li.star>i.fa {
-        font-size: 2.5em;
-        /* Change the size of the stars */
+    /* Hide radio */
+    .rate>input {
+        display: none;
+    }
+
+    /* Order correctly by floating highest to the right */
+    .rate>label {
+        float: right;
         color: #ccc;
-        /* Color on idle state */
     }
 
-    /* Hover state of the stars */
-    .rating-stars ul>li.star.hover>i.fa {
+    /* The star of the show */
+    .rate>label:before {
+        display: inline-block;
+        font-size: 2.8rem;
+        padding: 0.3rem 0.5rem;
+        margin: 0;
+        cursor: pointer;
+        font-family: FontAwesome;
+        content: "\f005 ";
+
+        /* full star */
+    }
+
+    /* Half star trick */
+    .rate .half:before {
+        content: "\f089 ";
+        /* half star no outline */
+        position: absolute;
+        padding-right: 0;
+    }
+
+    /* Click + hover color */
+    input:checked~label,
+    /* color current and previous stars on checked */
+    label:hover,
+    label:hover~label {
         color: #ffcc36;
     }
 
-    /* Selected state of the stars */
-    .rating-stars ul>li.star.selected>i.fa {
-        color: #ff912c;
+    /* color previous stars on hover */
+
+    /* Hover highlights */
+    input:checked+label:hover,
+    input:checked~label:hover,
+    /* highlight current and previous stars */
+    input:checked~label:hover~label,
+    /* highlight previous selected stars for new rating */
+    label:hover~input:checked~label
+
+    /* highlight previous selected stars */
+        {
+        color: #ffcc36;
+    }
+
+    @media only screen and (max-width: 900px) {
+        body {
+            margin: 20px;
+        }
     }
 </style>
 
@@ -208,110 +245,71 @@ if (isset($_POST['submit'])) {
         <div class="rating">Rating</div>
 
         <div class='rating-stars text-center'>
-            <ul id='stars'>
-                <li class='star' title='Poor' data-value='1'>
-                    <i class='fa fa-star fa-fw'></i>
-                </li>
-                <li class='star' title='Fair' data-value='2'>
-                    <i class='fa fa-star fa-fw'></i>
-                </li>
-                <li class='star' title='Good' data-value='3'>
-                    <i class='fa fa-star fa-fw'></i>
-                </li>
-                <li class='star' title='Excellent' data-value='4'>
-                    <i class='fa fa-star fa-fw'></i>
-                </li>
-                <li class='star' title='WOW!!!' data-value='5'>
-                    <i class='fa fa-star fa-fw'></i>
-                </li>
-            </ul>
+            <fieldset class="rate" id="star_select">
+                <input type="radio" id="rating10" name="rating" value="10" /><label for="rating10" title="5 stars"></label>
+                <input type="radio" id="rating9" name="rating" value="9" /><label class="half" for="rating9" title="4 1/2 stars"></label>
+                <input type="radio" id="rating8" name="rating" value="8" /><label for="rating8" title="4 stars"></label>
+                <input type="radio" id="rating7" name="rating" value="7" /><label class="half" for="rating7" title="3 1/2 stars"></label>
+                <input type="radio" id="rating6" name="rating" value="6" /><label for="rating6" title="3 stars"></label>
+                <input type="radio" id="rating5" name="rating" value="5" /><label class="half" for="rating5" title="2 1/2 stars"></label>
+                <input type="radio" id="rating4" name="rating" value="4" /><label for="rating4" title="2 stars"></label>
+                <input type="radio" id="rating3" name="rating" value="3" /><label class="half" for="rating3" title="1 1/2 stars"></label>
+                <input type="radio" id="rating2" name="rating" value="2" /><label for="rating2" title="1 star"></label>
+                <input type="radio" id="rating1" name="rating" value="1" /><label class="half" for="rating1" title="1/2 star"></label>
+
+            </fieldset>
         </div>
 
-        <div>Review</div>
+        <div class="rating">Review</div>
         <div>
-            <textarea id="reviewText" name="reviewText" rows="4" cols="50"></textarea>
+            <textarea id="reviewText" name="reviewText" rows="4" cols="50" placeholder="Start Typing"></textarea>
         </div>
-        <div>
+        <div style="margin:20px 0px;">
             <button type="submit" name="submit" id="submit" class="set_button">Submit Review</button>
         </div>
-
-        <!-- <div class="setButton" onclick="submitReview()">Submit Review</div> -->
-
     </form>
 
-
-
-
-    <div>
-    </div>
     <script>
         var total_rate = 0;
+        var total_hal_rate = 0;
+        var checkvalidstar = true;
+        var checkvalidtext = true;
         $(document).ready(function() {
-
-            /* 1. Visualizing things on Hover - See next part for action on click */
-            $('#stars li').on('mouseover', function() {
-                var onStar = parseInt($(this).data('value'), 10); // The star currently mouse on
-
-                // Now highlight all the stars that's not after the current hovered star
-                $(this).parent().children('li.star').each(function(e) {
-                    if (e < onStar) {
-                        $(this).addClass('hover');
-                    } else {
-                        $(this).removeClass('hover');
-                    }
-                });
-
-            }).on('mouseout', function() {
-                $(this).parent().children('li.star').each(function(e) {
-                    $(this).removeClass('hover');
-                });
-            });
-
-
-            /* 2. Action to perform on click */
-            $('#stars li').on('click', function() {
-                var onStar = parseInt($(this).data('value'), 10); // The star currently selected
-                total_rate = onStar;
-                var stars = $(this).parent().children('li.star');
-
-                for (i = 0; i < stars.length; i++) {
-                    $(stars[i]).removeClass('selected');
+            /* Action to perform on click to set rating Star */
+            $('#testda').on('click', function() {
+                var ele = document.getElementsByName('rating');
+                for (i = 0; i < ele.length; i++) {
+                    if (ele[i].checked) total_hal_rate = parseInt(ele[i].value) / 2;
+                    // console.log(total_hal_rate);
                 }
-
-                for (i = 0; i < onStar; i++) {
-                    $(stars[i]).addClass('selected');
-                }
-
-                // JUST RESPONSE (Not needed)
-                // var ratingValue = parseInt($('#stars li.selected').last().data('value'), 10);
-                var msg = "";
-                // responseMessage(msg);
-
             });
-
-
         });
 
-        $('#submit').on('click', function() {
-            document.cookie = escape("rate_star") + "=" +
-                escape(total_rate);
-            $('#submit_infor').submit();
-        });
-
-        function submitReview() {
-
-            // var x = document.getElementById("reviewText").value;
-
-            // console.log(x + total_rate);
-            // const queryString = window.location.search;
-
-            // const urlParams = new URLSearchParams(queryString);
-
-            // const page_type = urlParams.get('title')
-
-            // console.log(page_type);
+        //Validation check form
+        function submitForm() {
+            if (total_hal_rate == 0){ checkvalidstar = false;
+                alert("Please Select Star");
+            }else checkvalidstar = true;
+            if ($("#reviewText").val().trim().length < 1) {
+                alert("Please Enter Text...");
+                checkvalidtext = false;
+                return;
+            }else checkvalidtext = true;
 
         }
+
+        //form Submit click
+        $('#star_select').on('click', function() {
+            submitForm();
+            if (checkvalidstar && checkvalidtext) {
+                document.cookie = escape("rate_star") + "=" +
+                    escape(total_hal_rate);
+                $('#submit_infor').submit();
+            } else {
+                return false;
+            }
+
+        });
     </script>
 
 </body>

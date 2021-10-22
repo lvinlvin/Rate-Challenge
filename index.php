@@ -1,57 +1,5 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-$conn = new mysqli("localhost:3306", "root", "root");
-// Check connection
-if ($conn->connect_error) {
-   die("Connection failed: " . $conn->connect_error);
-}
-
-// use Workerman\Worker;
-// use PHPSocketIO\SocketIO;
-
-// $io = new SocketIO(2500);
-// // 当有客户端连接时
-// $io->on('connection', function($socket)use($io){
-//   // 定义chat message事件回调函数
-//   $socket->on('chat message', function($msg)use($io){
-//     // 触发所有客户端定义的chat message from server事件
-//     $io->emit('chat message from server', $msg);
-//   });
-// });
-// Worker::runAll();
-
-if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
-   echo 'We don\'t have mysqli!!!';
-} else {
-   $mysqlNew = "SELECT * FROM ratechallenge.item";
-   $resultNewLocation = $conn->query($mysqlNew);
-   if ($resultNewLocation->num_rows > 0) {
-      $getitem = [];
-      while ($row = $resultNewLocation->fetch_assoc()) {
-         $itemob = array(
-            "id" => $row["id"],
-            "name" => $row["name"],
-         );
-         array_push($getitem, $itemob);
-      }
-   }
-
-   $queryReview = "SELECT * FROM ratechallenge.rate";
-   $resultReview = $conn->query($queryReview);
-
-   //Get Review
-   if ($resultReview->num_rows > 0) {
-      $getReview = [];
-      while ($row = $resultReview->fetch_assoc()) {
-         $itemob = array(
-            "star" => $row["star"],
-            "review" => $row["review"],
-            "item_id" => $row["item_id"],
-         );
-         array_push($getReview, $itemob);
-      }
-   }
-}
 ?>
 
 <!DOCTYPE html>
@@ -84,20 +32,18 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    }
 
    .title {
-      /* text-align: center; */
       font-size: 38px;
       font-weight: bold;
       margin: 20px 0px;
    }
 
    .setRow {
-      /* display: flex;
-      justify-content: space-around; */
       width: 600px;
    }
 
    .total_rate {
       font-size: 28px;
+      font-weight: bold;
    }
 
    .setButton {
@@ -109,6 +55,7 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
       height: 38px;
       border-radius: 6px;
       float: right;
+      cursor: pointer;
    }
 
    .review_row {
@@ -119,6 +66,7 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
    .review_title {
       font-size: 24px;
       margin: 20px 0px;
+      font-weight: bold;
    }
 
    .review_total {
@@ -242,131 +190,191 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
       width: 10px;
       overflow: hidden;
    }
+
+   @media only screen and (max-width: 900px) {
+      body {
+         max-width: 100vw;
+         padding: 0px;
+      }
+   }
 </style>
 
 <body>
 
-
-   <?php foreach ($getitem as $value) {
-   ?>
-      <div style="width:600px;">
-         <div class="title"><?php echo $value["name"] . "</br>"; ?></div>
-         <div class="setRow">
-            <div style="display:flex; float:left;">
-               <?php
-               $total_star = 0;
-               $total_r = 0;
-               $showRe = false;
-               $reviewP = 0;
-               if (count($getReview) > 0) {
-                  foreach ($getReview as $v) {
-                     if ($v["item_id"] == $value["id"]) {
-                        $total_r++;
-                        $total_star += $v["star"];
-                        $showRe = true;
-                     }
-                  }
-                  if ($showRe) $reviewP = $total_star / $total_r;
-                  //become number
-                  $showTotalStarReviewSelected = round($reviewP);
-                  $showTotalStarReview = 5 - $showTotalStarReviewSelected;
-               }
-               ?>
-               <div class="total_rate" id="total_rate"><?php echo $reviewP; ?></div>
-               <div style="width:20px;"></div>
-               <div class='rating-stars text-center'>
-                  <ul id='stars'>
-                     <?php
-                     for ($i = 0; $i < $showTotalStarReviewSelected; $i++) {
-                     ?>
-                        <li class='star selected'>
-                           <i class='fa fa-star fa-fw'></i>
-                        </li>
-                     <?php
-                     }
-                     for ($i = 0; $i < $showTotalStarReview; $i++) {
-                     ?>
-                        <li class='star'>
-                           <i class='fa fa-star fa-fw'></i>
-                        </li>
-                     <?php
-                     }
-                     ?>
-                  </ul>
-               </div>
-            </div>
-
-            <div class="setButton" onclick="goAddReview('<?php echo $value['id'] ?>');">Add Review</div>
-         </div>
-         <div style="clear: both;"></div>
-         <?php
-         if ($showRe) {
-         ?>
-            <hr>
-            <div>
-               <div class="review_title">Review</div>
-               <?php
-               foreach ($getReview as $val) {
-                  if ($val["item_id"] == $value["id"]) {
-               ?>
-
-                     <?php
-                     $unStar = 5 - $val["star"];
-                     // echo $unStar;
-                     ?>
-                     <div class="review_row">
-                        <div class='rating-stars text-center'>
-                           <ul id='stars'>
-                              <?php
-                              for ($i = 0; $i < $val["star"]; $i++) {
-                              ?>
-                                 <li class='star selected'>
-                                    <i class='fa fa-star fa-fw'></i>
-                                 </li>
-                              <?php
-                              }
-                              for ($j = 0; $j < $unStar; $j++) {
-                              ?>
-                                 <li class='star'>
-                                    <i class='fa fa-star fa-fw'></i>
-                                 </li>
-                              <?php
-                              }
-                              ?>
-                              <!-- <li class='star selected'>
-                           <i class='fa fa-star-half-full fa-fw'></i>
-                        </li> -->
-                           </ul>
-                        </div>
-                        <div style="width:20px;"></div>
-                        <div class="review_total"><?php echo $val["star"] ?>, <?php echo $val['review'] ?> </div>
-                     </div>
-            <?php
-                  }
-               }
-            } ?>
-            </div>
-      </div>
-   <?php
-   }
-   ?>
-
-
    <div>
+      <div id="title_show"></div>
    </div>
+
+
    <script>
-      //start socket
-   //    var socket = io('http://localhost:2500', {
-   //      secure: true,
-   //      transports: ['websocket', 'polling']
-   //  });
+      // start socket
+      var socket = io('http://localhost:2500', {
+         secure: true,
+         transports: ['websocket', 'polling']
+      });
 
 
 
       $(document).ready(function() {
-
-
+         // load_data();
       });
+
+      //Call API to get the lastest data with real-time and also generate the front-end webview
+      load_data = () => {
+         $.get("http://localhost:3100/item/getAllItem", function(data, status) {
+
+            var displayTitle = "";
+            var showItemId = [];
+            var showItem = [];
+            var totalReview = [];
+            var totalStar = [];
+            var totalReviewValue = [];
+            var totalStarValue = [];
+            var getData = data["data"]["result"];
+
+            //Put Return API name and item_id to a Array
+            for (var i = 0; i < getData.length; i++) {
+               showItem.push(getData[i]["name"]);
+               showItemId.push(getData[i]["item_id"]);
+            }
+            //Filter the duplicate name and item_id
+            var unique = showItem.filter(function(itm, i, a) {
+               return i == showItem.indexOf(itm);
+            });
+            var uniqueid = showItemId.filter(function(itm, i, a) {
+               return i == showItemId.indexOf(itm);
+            });
+
+            //Split the Return API data into multiple Array 
+            for (var i = 0; i < unique.length; i++) {
+               var total_dataStar = 0.0;
+               var totalAllReview = 0;
+               var ReviewValue = [];
+               var StarValue = [];
+               for (var j = 0; j < getData.length; j++) {
+                  if (unique[i] == getData[j]["name"]) {
+                     if (getData[j]["star"] != null) {
+                        total_dataStar += parseFloat(getData[j]["star"]);
+                        totalAllReview++;
+                     }
+
+                     if (getData[j]["review"] != null) ReviewValue.push(getData[j]["review"]);
+                     if (getData[j]["star"] != null) StarValue.push(getData[j]["star"]);
+
+                  }
+               }
+
+               totalStar.push(total_dataStar);
+               totalReview.push(totalAllReview);
+               totalReviewValue.push(ReviewValue);
+               totalStarValue.push(StarValue);
+
+            }
+
+
+            //Start to create a webview
+            for (var i = 0; i < unique.length; i++) {
+
+               var showingRate = 0;
+               var unStar = 0;
+               var Stared = 0;
+               var halfS = 0;
+               var total_Star = totalStar[i];
+
+               var total_Review = totalReview[i];
+               //Check the totalReview is that more that one and check halfstar generate for the Total Rating Point and Star
+               if (parseInt(total_Review) >= 1) {
+                  showingRate = (total_Star / total_Review).toFixed(1);
+                  if (showingRate % 1) {
+                     unStar = 4 - parseInt(showingRate);
+                     Stared = 4 - parseInt(unStar);
+                     halfS += 1;
+                  } else {
+                     unStar = 5 - parseInt(showingRate);
+                     Stared = 5 - parseInt(unStar);
+                  }
+
+               } else {
+                  showingRate = parseInt(total_Star);
+                  Stared = parseInt(total_Star);
+                  unStar = 5 - parseInt(Stared);
+               }
+
+               //store name and item_id
+               var name = unique[i];
+               var getid = uniqueid[i];
+               if (name == "Hyundai") console.log(total_Review);
+               //Show the Name of product
+               displayTitle += '<div style="margin:40px 0px;border: 1px solid black;padding: 30px; width: 680px;"><div class="title">' + name + '</div>';
+               displayTitle += '<div class="setRow"><div style="display:flex; float:left;">';
+               //To display with full star or halfstar also if empty
+               if (parseInt(total_Review) > 0) {
+                  displayTitle += '<div class="total_rate" id="total_rate">' + showingRate + '</div>';
+                  displayTitle += '<div style="width:20px;"></div><div class="rating-stars text-center"><ul id="stars">';
+                  for (var j = 0; j < Stared; j++) {
+                     displayTitle += "<li class='star selected'>  <i class='fa fa-star fa-fw'></i> </li>";
+                  }
+                  for (var j = 0; j < halfS; j++) {
+                     displayTitle += "<li class='star selected'>  <i class='fa fa-star-half-full fa-fw'></i> </li>";
+                  }
+                  for (var k = 0; k < unStar; k++) {
+                     displayTitle += " <li class='star'> <i class='fa fa-star fa-fw'></i></li>";
+                  }
+               } else {
+                  displayTitle += '<div class="total_rate" id="total_rate">0.0</div>';
+                  displayTitle += '<div style="width:20px;"></div><div class="rating-stars text-center"><ul id="stars">';
+                  for (var k = 0; k < 5; k++) {
+                     displayTitle += " <li class='star'> <i class='fa fa-star fa-fw'></i></li>";
+                  }
+               }
+
+               displayTitle += "  </ul> </div> </div>";
+               displayTitle += ' <div class="setButton" onclick="goAddReview(' + getid + ');">Add Review</div>';
+               displayTitle += '</div><div style="clear: both;"></div>';
+               //Generate Total Review of the item at below 
+               if (parseInt(total_Review) > 0) {
+                  displayTitle += '<hr> <div class="review_title">Reviews</div>';
+
+                  for (var j = 0; j < totalReviewValue[i].length; j++) {
+                     var getR = totalReviewValue[i][j];
+                     var getS = totalStarValue[i][j];
+                     var countS = getS;
+                     var unstar = 0;
+                     var halfstar = 0;
+                     if (getS % 1) {
+                        halfstar++;
+                        unstar = 4 - getS;
+                        countS--;
+
+                     } else {
+                        unstar = 5 - getS;
+                     }
+
+                     displayTitle += '<div class="review_row"><div class="rating-stars text-center"><ul id="stars">';
+                     for (var k = 0; k < countS; k++) {
+                        displayTitle += '<li class="star selected"><i class="fa fa-star fa-fw"></i></li>';
+                     }
+                     if (halfstar != 0) {
+                        displayTitle += '<li class="star selected"><i class="fa fa-star-half-full fa-fw"></i></li>';
+                     }
+                     for (var l = 0; l < unstar; l++) {
+                        displayTitle += '<li class="star"><i class="fa fa-star fa-fw"></i></li>';
+                     }
+                     displayTitle += '</ul> </div><div style="width:20px;"></div>';
+
+                     displayTitle += '<div class="review_total">' + getS + ', ' + getR + '</div></div>';
+
+                  }
+
+               }
+
+               displayTitle += "</div>";
+            }
+            $("#title_show").html(displayTitle);
+         });
+
+      }
+
       //go to page AddReview
       function goAddReview(title) {
          //put into cookie
@@ -374,11 +382,14 @@ if (!function_exists('mysqli_init') && !extension_loaded('mysqli')) {
          location.href = "review.php";
       }
 
-      // socket.on("add_review", function(data)
-      // {
+      //Listening websocket to get real-time data
+      socket.emit("listening");
 
-      //       $(total_rate).appendChild()
-      // })
+      //If get request update it, real-time
+      socket.on("add_review", (data) => {
+         load_data();
+
+      })
    </script>
 
 </body>
