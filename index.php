@@ -75,6 +75,16 @@ header("Access-Control-Allow-Origin: *");
       font-size: 20px;
    }
 
+   .error {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: bold;
+      margin-top: 40vh;
+
+   }
+
    * {
       -webkit-box-sizing: border-box;
       -moz-box-sizing: border-box;
@@ -204,6 +214,9 @@ header("Access-Control-Allow-Origin: *");
    <div>
       <div id="title_show"></div>
    </div>
+   <div class="error" id="err">
+      Somethings is wrong, please contact with our engineer team.
+   </div>
 
 
    <script>
@@ -216,7 +229,13 @@ header("Access-Control-Allow-Origin: *");
 
 
       $(document).ready(function() {
-         // load_data();
+         // console.log(socket.connected);
+         if (!socket.connected) {
+            $("#err").show();
+         }
+         // else {
+         //    $("#err").hide();
+         // }
       });
 
       //Call API to get the lastest data with real-time and also generate the front-end webview
@@ -303,7 +322,7 @@ header("Access-Control-Allow-Origin: *");
                //store name and item_id
                var name = unique[i];
                var getid = uniqueid[i];
-               if (name == "Hyundai") console.log(total_Review);
+
                //Show the Name of product
                displayTitle += '<div style="margin:40px 0px;border: 1px solid black;padding: 30px; width: 680px;"><div class="title">' + name + '</div>';
                displayTitle += '<div class="setRow"><div style="display:flex; float:left;">';
@@ -383,7 +402,22 @@ header("Access-Control-Allow-Origin: *");
       }
 
       //Listening websocket to get real-time data
-      socket.emit("listening");
+      // socket.emit("listening");
+
+      socket.on('disconnect', function() {
+         console.log("disconnect");
+         $("#err").show();
+         $("#title_show").hide();
+
+      });
+      socket.on('connect', () => {
+         console.log("connect");
+         $("#err").hide();
+         $("#title_show").show();
+         socket.emit("listening");
+
+      });
+
 
       //If get request update it, real-time
       socket.on("add_review", (data) => {
