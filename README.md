@@ -24,7 +24,8 @@ To support half-star selection is also a big challenge to me because need checks
 
 <h3>Architectural decisions </h3>
 At first, I plan to use workerman and phpsocket.io plugin as WebSocket that easily I use one PHP to do all conditions but when I try to see the documentation inside the GitHub, it does not have much information that GitHub provides me to use this plugin on Window.
-After that, I decide to use NodeJS as WebSocket and also REST API Request. I try to make multiple products to display and show the Review. In this part, I try lots of conditions to handle this.
+</br>
+After that, I decide to use NodeJS as WebSocket and also REST API Request. Successful make support real-time update for multiple products to display and show the Review.
 
 If asking me what I will do differently next time around, it will be at the handle to display the UI to show total Rate, total Star, Product Review for multiple Products.
 I will not be using too much For to filter the return API data and try to use another solution to solve this kind of problem that I didn't have any idea about for now.
