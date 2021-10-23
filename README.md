@@ -49,6 +49,10 @@ CREATE TABLE `ratechallenge`.`rate` (
 `created_at` DATETIME NULL,
 PRIMARY KEY (`id`));
 
+
+//Insert a product to display at front-end </br>
+INSERT INTO `ratechallenge`.`item` (`name`, `active`) VALUES ('Product', '1');</br>
+
 Table 'item' column 'active' is to display or hide the product at Front-end.
 
 

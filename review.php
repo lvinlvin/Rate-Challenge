@@ -276,7 +276,7 @@ if (isset($_POST['submit'])) {
         var checkvalidtext = true;
         $(document).ready(function() {
             /* Action to perform on click to set rating Star */
-            $('#testda').on('click', function() {
+            $('#star_select').on('click', function() {
                 var ele = document.getElementsByName('rating');
                 for (i = 0; i < ele.length; i++) {
                     if (ele[i].checked) total_hal_rate = parseInt(ele[i].value) / 2;
@@ -299,7 +299,7 @@ if (isset($_POST['submit'])) {
         }
 
         //form Submit click
-        $('#star_select').on('click', function() {
+        $('#submit').on('click', function() {
             submitForm();
             if (checkvalidstar && checkvalidtext) {
                 document.cookie = escape("rate_star") + "=" +
